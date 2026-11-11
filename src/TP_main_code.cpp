@@ -75,23 +75,24 @@ int main() {
     outFile.close();
     cout << "\n'individual_result' is saved successfully." << endl;
 
-    // 8. 1000개 단위 구간 평균 데이터 저장
-    ofstream avgFile("avg_result.txt");
+    // 8. 누적 평균을 계산하여 결과 텍스트 파일로 출력
+    ofstream convFile("convergence_result.txt");
+    convFile << "Simulation_Count,Cumulative_Avg_Attempts,Cumulative_Avg_Cost\n";
 
     int interval = 1000;
-    long long interval_sum = 0;
+    long long running_sum = 0;
     for (int i = 0; i < total_simulations; ++i) {
-        interval_sum += attempt_history[i];
-        
+        running_sum += attempt_history[i];
+            
+        // 1,000개 단위마다 지금까지의 '전체 누적 평균' 계산
         if ((i + 1) % interval == 0) {
-            double interval_avg_att = static_cast<double>(interval_sum) / interval;
-            double interval_avg_cost = interval_avg_att * pool.price_per_ticket;
-            avgFile << (i + 1) << " " << interval_avg_att << " " << interval_avg_cost << "\n";
-            interval_sum = 0; // 다음 반복을 실행하기 전에 interval_sum 초기화
-            }
+            double cumulative_avg_att = static_cast<double>(running_sum) / (i + 1);
+            double cumulative_avg_cost = cumulative_avg_att * pool.price_per_ticket;
+                
+            convFile << (i + 1) << " " << cumulative_avg_att << " " << cumulative_avg_cost << "\n";
         }
-    avgFile.close();
-    
-    cout << "\n'avg_result' is saved successfully." << endl;
+    }
+    convFile.close();
+    cout << "'convergence_result' is saved successfully." << endl;
     return 0;
 }
