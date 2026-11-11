@@ -77,7 +77,6 @@ int main() {
 
     // 8. 누적 평균을 계산하여 결과 텍스트 파일로 출력
     ofstream convFile("convergence_result.txt");
-    convFile << "Simulation_Count,Cumulative_Avg_Attempts,Cumulative_Avg_Cost\n";
 
     int interval = 1000;
     long long running_sum = 0;
