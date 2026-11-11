@@ -66,18 +66,32 @@ int main() {
     cout << "average attempts for A PRIZE: " << average_attempts << " time(s)" << endl;
     cout << "average cost for A PRIZE: " << average_cost << " won" << endl;
 
-    // 7. 결과 텍스트 파일로 출력
-    ofstream outFile("simulation_result.txt");
+    // 7. 개별 결과 텍스트 파일로 출력
+    ofstream outFile("individual_result.txt");
 
     for (int i = 0; i < total_simulations; i++) {
         outFile << (i + 1) << " " << attempt_history[i] << " " << (attempt_history[i] * pool.price_per_ticket) << endl;
     }
-    
     outFile.close();
-    cout << "\nThe file is saved successfully." << endl;
+    cout << "\n'individual_result' is saved successfully." << endl;
+
+    // 8. 1000개 단위 구간 평균 데이터 저장
+    ofstream avgFile("avg_result.txt");
+
+    int interval = 1000;
+    long long interval_sum = 0;
+    for (int i = 0; i < total_simulations; ++i) {
+        interval_sum += attempt_history[i];
+        
+        if ((i + 1) % interval == 0) {
+            double interval_avg_att = static_cast<double>(interval_sum) / interval;
+            double interval_avg_cost = interval_avg_att * pool.price_per_ticket;
+            avgFile << (i + 1) << " " << interval_avg_att << " " << interval_avg_cost << "\n";
+            interval_sum = 0; // 다음 반복을 실행하기 전에 interval_sum 초기화
+            }
+        }
+    avgFile.close();
     
-    if (!outFile) {
-        cout << "Can't save the file properly." << endl;
-    }
+    cout << "\n'avg_result' is saved successfully." << endl;
     return 0;
 }
