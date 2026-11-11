@@ -16,7 +16,7 @@
 ## 3. 빌드 및 실행 방법
 
 1. C++ source code를 compile하고 실행하여 txt 데이터 파일을 생성하는 방법
-(1) `src/` 폴더 안의 소스코드(`main.cpp`)를 C++ 지원 컴파일러(Visual Studio 2022)에서 연다.
+(1) `src/` 폴더 안의 소스코드(`TP_main_code.cpp`)를 C++ 지원 컴파일러(Visual Studio 2022)에서 연다.
 (2) 아래 명령어나 IDE 빌드 버튼을 통해 실행 파일을 생성하고 실행한다.
    ```bash
    g++ -std=c++17 src/main.cpp -o ichibankuji_sim
