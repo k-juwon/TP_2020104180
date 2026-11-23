@@ -1,0 +1,30 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// F1: 이치방쿠지 한 세트 구성 (총 80개 기준)
+struct PrizePool {
+    int total_tickets = 80;
+    vector<int> counts = { 2, 3, 5, 10, 20, 40 }; // A상: 2, B상: 3, C상: 5, D상: 10, E상: 20, F상: 40
+    int price_per_ticket = 8000;                  // 1회 비용 8,000원
+};
+
+// 티켓 상자 생성 함수
+vector<int> create_ticket_box(const PrizePool& pool) {
+    vector<int> tickets;
+    tickets.reserve(pool.total_tickets);
+    for (size_t i = 0; i < pool.counts.size(); ++i) {
+        for (int c = 0; c < pool.counts[i]; ++c) {
+            tickets.push_back(static_cast<int>(i));
+        }
+    }
+    return tickets;
+}
+
+int main() {
+    PrizePool pool;
+    vector<int> box = create_ticket_box(pool);
+    cout << "[F1] Prize pool initialized. Total tickets: " << box.size() << endl;
+    return 0;
+}
