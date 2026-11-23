@@ -1,0 +1,129 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <fstream>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+
+// F1: 이치방쿠지 한 세트 구성 (총 80개 기준)
+struct PrizePool {
+    int total_tickets = 80;
+    vector<int> counts = { 2, 3, 5, 10, 20, 40 }; // A상: 2개, B상: 3개, C상: 5개, D상: 10개, E상: 20개, F상: 40개
+    int price_per_ticket = 8000;                  // 1회 비용: 8,000원
+};
+
+// 티켓 상자 생성 함수
+vector<int> create_ticket_box(const PrizePool& pool) {
+    vector<int> tickets;
+    tickets.reserve(pool.total_tickets);
+    for (size_t i = 0; i < pool.counts.size(); ++i) {
+        for (int c = 0; c < pool.counts[i]; ++c) {
+            tickets.push_back(static_cast<int>(i));
+        }
+    }
+    return tickets;
+}
+
+// F2: 난수 기반 비복원 추출 엔진 (A상 당첨 시까지 반복)
+int simulate_one_round(mt19937& gen, const PrizePool& pool) {
+    vector<int> tickets = create_ticket_box(pool);
+    int attempts = 0;
+
+    while (!tickets.empty()) {
+        uniform_int_distribution<size_t> dist(0, tickets.size() - 1);
+        size_t index = dist(gen);
+        attempts++;
+
+        if (tickets[index] == 0) { break; } // A상을 뽑으면 종료
+        tickets.erase(tickets.begin() + index); // 비복원 추출 처리
+    }
+    return attempts;
+}
+
+// F4: 개별 결과 및 누적 평균 수렴 데이터를 텍스트 파일로 출력
+void export_results(const vector<int>& attempt_history, const PrizePool& pool) {
+    int total_simulations = static_cast<int>(attempt_history.size());
+
+    // 1. 개별 결과 텍스트 파일 출력
+    ofstream outFile("individual_result.txt");
+    if (outFile.is_open()) {
+        for (int i = 0; i < total_simulations; i++) {
+            outFile << (i + 1) << " " << attempt_history[i] << " " << (attempt_history[i] * pool.price_per_ticket) << "\n";
+        }
+        outFile.close();
+        cout << "\n[F4] 'individual_result.txt' is saved successfully." << endl;
+    }
+
+    // 2. 누적 평균 수렴 결과 텍스트 파일 출력 (1,000회 단위)
+    ofstream convFile("convergence_result.txt");
+    if (convFile.is_open()) {
+        int interval = 1000;
+        long long running_sum = 0;
+        long long first_try_hits = 0;
+
+        for (int i = 0; i < total_simulations; ++i) {
+            running_sum += attempt_history[i];
+            if (attempt_history[i] == 1) first_try_hits++;
+
+            if ((i + 1) % interval == 0) {
+                double cumulative_avg_att = static_cast<double>(running_sum) / (i + 1);
+                double cumulative_avg_cost = cumulative_avg_att * pool.price_per_ticket;
+                double cumulative_first_prob = static_cast<double>(first_try_hits) / (i + 1);
+
+                // 회차 | 누적평균횟수 | 누적평균비용 | 누적초회당첨확률
+                convFile << (i + 1) << " " << cumulative_avg_att << " " << cumulative_avg_cost << " " << cumulative_first_prob << "\n";
+            }
+        }
+        convFile.close();
+        cout << "[F4] 'convergence_result.txt' is saved successfully." << endl;
+    }
+}
+
+int main() {
+    cout << fixed << setprecision(4);
+
+    // F3: Monte Carlo Simulation 준비 및 실행 (N = 100,000)
+    int total_simulations = 100000;
+    PrizePool pool;
+
+    random_device rd;
+    mt19937 gen(rd());
+
+    long long total_attempts = 0;
+    long long first_try_wins = 0;
+    vector<int> attempt_history;
+    attempt_history.reserve(total_simulations);
+
+    for (int i = 0; i < total_simulations; ++i) {
+        int att = simulate_one_round(gen, pool);
+        total_attempts += att;
+        if (att == 1) first_try_wins++;
+        attempt_history.push_back(att);
+    }
+
+    double average_attempts = static_cast<double>(total_attempts) / total_simulations;
+    double average_cost = average_attempts * pool.price_per_ticket;
+
+    // 정량적 성공 기준 검증 (이론값 대비 오차율 계산)
+    double theoretical_attempts = static_cast<double>(pool.total_tickets + 1) / (pool.counts[0] + 1); // 27.0회
+    double theoretical_cost = theoretical_attempts * pool.price_per_ticket;                         // 216,000원
+    double cost_error_rate = abs(average_cost - theoretical_cost) / theoretical_cost * 100.0;
+
+    double sim_prob = static_cast<double>(first_try_wins) / total_simulations;
+    double theoretical_prob = static_cast<double>(pool.counts[0]) / pool.total_tickets; // 0.025 (2.5%)
+    double prob_error = abs(sim_prob - theoretical_prob) * 100.0;
+
+    // 콘솔 결과 요약 출력
+    cout << "===== Monte Carlo Simulation Result (N = " << total_simulations << ") =====" << endl;
+    cout << "Average attempts for A PRIZE : " << average_attempts << " times (Theoretical: " << theoretical_attempts << ")" << endl;
+    cout << "Average cost for A PRIZE     : " << average_cost << " won (Theoretical: " << theoretical_cost << " won)" << endl;
+    cout << "Expected cost error rate     : " << cost_error_rate << " % (Goal: < 1.0%)" << endl;
+    cout << "First-try A Prize prob       : " << sim_prob * 100.0 << " % (Theoretical: 2.5000 %, Diff: " << prob_error << " %)" << endl;
+
+    // F4: 결과 파일 출력 실행
+    export_results(attempt_history, pool);
+
+    return 0;
+}
