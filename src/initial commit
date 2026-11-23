@@ -1,0 +1,17 @@
+#include <iostream>
+#include <vector>
+#include <random>
+
+using namespace std;
+
+// 이치방쿠지 한 세트 기본 구성 (총 80개)
+struct PrizePool {
+    int total_tickets = 80;
+    vector<int> counts = { 2, 3, 5, 10, 20, 40 }; // A~F상 개수
+    int price_per_ticket = 8000;                // 1회 가격
+};
+
+int main() {
+    cout << "Ichiban Kuji Monte Carlo Simulation Initialized." << endl;
+    return 0;
+}
