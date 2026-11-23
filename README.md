@@ -40,3 +40,5 @@
 1. 소프트웨어랩 강의자료 1강, 5강
 2. C++ Reference (std::mt19937, std::ofstream)
 3. Sheldon Ross, Introduction to Probability Models (12th ed.) - 무작위 추출 및 Monte Carlo Method
+
+##8. Youtube 일부공개 링크: https://youtu.be/eHMoY_P2IOc
